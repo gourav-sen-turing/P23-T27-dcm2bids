@@ -1,0 +1,64 @@
+{
+    "age": {
+        "LongName": "",
+        "Description": "age of the participant",
+        "Levels": [],
+        "Units": "years",
+        "TermURL": ""
+    },
+    "sex": {
+        "LongName": "",
+        "Description": "sex of the participant as reported by the participant",
+        "Levels": {
+            "M": "male",
+            "F": "female"
+        },
+        "Units": "",
+        "TermURL": ""
+    },
+    "group": {
+        "LongName": "",
+        "Description": "Group of the participant",
+        "Levels": {
+            "control": "Control",
+            "patient": "Patient"
+        },
+        "Units": "",
+        "TermURL": ""
+    },
+
+
+}
+
+{
+    "age": {
+        "LongName": "",
+        "Description": "age of the participant",
+        "Levels": [],
+        "Units": "years",
+        "TermURL": ""
+    },
+    "sex": {
+        "LongName": "",
+        "Description": "sex of the participant as reported by the participant",
+        "Levels": {
+            "M": "male",
+            "F": "female"
+        },
+        "Units": "",
+        "TermURL": ""
+    },
+    "group": {
+        "LongName": "",
+        "Description": "Group of the participant",
+        "Levels": {
+            "control": "Control",
+            "patient": "Patient"
+        },
+        "Units": "",
+        "TermURL": ""
+    },
+
+
+}
+
