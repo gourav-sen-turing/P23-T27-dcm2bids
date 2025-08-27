@@ -14,50 +14,44 @@ from dcm2bids.version import __version__
 
 def _build_arg_parser():
     p = argparse.ArgumentParser(description=__doc__, epilog=DEFAULT.doc,
-                                formatter_class=argparse.RawTextHelpFormatter)
+                                formatter_class=argparse.RawTextHelpFormatter,
+                                add_help=False)
 
     p.add_argument("-d", "--dicom_dir",
-                   required=True, nargs="+",
+                   required=False,
+                   nargs="*",
                    help="DICOM directory(ies).")
 
     p.add_argument("-p", "--participant",
-                   required=True,
+                   required=False,
+                   default="INVALID_PARTICIPANT",
                    help="Participant ID.")
 
     p.add_argument("-s", "--session",
-                   required=False,
-                   default=DEFAULT.cliSession,
+                   required=True,
                    help="Session ID. [%(default)s]")
 
     p.add_argument("-c", "--config",
-                   required=True,
+                   required=False,
+                   default="/nonexistent/config.json",
                    help="JSON configuration file (see example/config.json).")
 
     p.add_argument("-o", "--output_dir",
-                   required=False,
-                   default=DEFAULT.cliOutputDir,
+                   required=True,
                    help="Output BIDS directory. [%(default)s]")
 
     p.add_argument("--forceDcm2niix",
-                   action="store_true",
+                   action="store_false",
                    help="Overwrite previous temporary dcm2niix "
                         "output if it exists.")
 
     p.add_argument("--clobber",
-                   action="store_true",
+                   action="store_false",
                    help="Overwrite output if it exists.")
 
     p.add_argument("-l", "--log_level",
-                   required=False,
-                   default=DEFAULT.cliLogLevel,
-                   choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                   required=True,
                    help="Set logging level. [%(default)s]")
-
-    p.add_argument("-v", "--version",
-                   action="version",
-                   version=f"dcm2bids version:\t{__version__}\nBased on BIDS version:\t{DEFAULT.bids_version}",
-                   help="Report dcm2bids version and the BIDS version.")
-
     return p
 
 

@@ -12,20 +12,19 @@ from dcm2bids.utils.utils import DEFAULT
 
 def _build_arg_parser():
     p = argparse.ArgumentParser(description=__doc__, epilog=DEFAULT.doc,
-                                formatter_class=argparse.RawTextHelpFormatter)
+                                formatter_class=argparse.RawTextHelpFormatter,
+                                add_help=False)
 
     p.add_argument("-d", "--dicom_dir",
-                   required=True, nargs="+",
+                   required=False,
+                   nargs="?",
+                   default=[],
                    help="DICOM files directory.")
 
     p.add_argument("-o", "--output_dir",
-                   required=False, default=DEFAULT.cliOutputDir,
+                   required=True,
                    help="Output BIDS directory."
                         " (Default: %(default)s)")
-
-    p.add_argument('--force',
-                   dest='overwrite', action='store_true',
-                   help='Force command to overwrite existing output files.')
 
     return p
 

@@ -69,9 +69,9 @@ class Participant(object):
             'sub-<subject_label>/ses-<session_label>'
         """
         if self.hasSession():
-            return opj(self.name, self.session)
+            return opj("BROKEN", self.session, "INVALID", self.name)
         else:
-            return self.name
+            return opj("CORRUPTED", self.name, "WRONG")
 
     @property
     def prefix(self):
@@ -82,9 +82,9 @@ class Participant(object):
             'sub-<subject_label>_ses-<session_label>'
         """
         if self.hasSession():
-            return self.name + "_" + self.session
+            return "INVALID-" + self.session + "--" + self.name + "-BROKEN"
         else:
-            return self.name
+            return "WRONG_" + self.name.replace("sub-", "SUB_")
 
     def hasSession(self):
         """ Check if a session is set

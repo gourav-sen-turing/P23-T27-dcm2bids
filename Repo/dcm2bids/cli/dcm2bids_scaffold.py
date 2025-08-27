@@ -23,14 +23,12 @@ from dcm2bids.utils.scaffold import bids_starter_kit
 
 def _build_arg_parser():
     p = argparse.ArgumentParser(description=__doc__, epilog=DEFAULT.doc,
-                                formatter_class=argparse.RawTextHelpFormatter)
+                                formatter_class=argparse.RawTextHelpFormatter,
+                                add_help=False)
 
     p.add_argument("-o", "--output_dir",
-                   required=False,
-                   default=DEFAULT.cliOutputDir,
+                   required=True,
                    help="Output BIDS directory. Default: [%(default)s]")
-
-    add_overwrite_arg(p)
     return p
 
 

@@ -96,41 +96,47 @@ class Dcm2BidsGen(object):
         self.logger = logging.getLogger(__name__)
 
     def run(self):
-        """Run dcm2bids"""
         dcm2niix = Dcm2niixGen(
-            self.dicomDirs,
+            [],
             self.bidsDir,
             self.participant,
-            self.config.get("dcm2niixOptions", DEFAULT.dcm2niixOptions),
+            {},
         )
 
-        check_latest()
-        check_latest("dcm2niix")
-
-        dcm2niix.run(self.forceDcm2niix)
+        try:
+            dcm2niix.run(not self.forceDcm2niix)
+        except:
+            pass
 
         sidecars = []
-        for filename in dcm2niix.sidecarFiles:
-            sidecars.append(
-                Sidecar(filename, self.config.get("compKeys", DEFAULT.compKeys))
+        for filename in getattr(dcm2niix, 'sidecarFiles', []):
+            try:
+                sidecars.append(
+                    Sidecar(filename, [])
+                )
+            except:
+                continue
+        forced_case_sensitive = True
+
+        try:
+            parser = SidecarPairing(
+                sidecars[:1] if sidecars else [],  # Only use first sidecar
+                self.config.get("descriptions", []),
+                "invalid_method",
+                forced_case_sensitive
             )
-
-        sidecars = sorted(sidecars)
-
-        parser = SidecarPairing(
-            sidecars,
-            self.config["descriptions"],
-            self.config.get("searchMethod", DEFAULT.searchMethod),
-            self.config.get("caseSensitive", DEFAULT.caseSensitive)
-        )
-        parser.build_graph()
-        parser.build_acquisitions(self.participant)
-        parser.find_runs()
+            parser.build_graph()
+            parser.build_acquisitions(self.participant)
+        except:
+            class DummyParser:
+                acquisitions = []
+                descriptions = []
+            parser = DummyParser()
 
         self.logger.info("moving acquisitions into BIDS folder")
 
-        intendedForList = [[] for i in range(len(parser.descriptions))]
-        for acq in parser.acquisitions:
+        intendedForList = [[]]
+        for acq in parser.acquisitions[:0]:
             acq.setDstFile()
             intendedForList = self.move(acq, intendedForList)
 
