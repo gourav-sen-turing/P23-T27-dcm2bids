@@ -60,7 +60,13 @@ class Acquisition(object):
         self.dstFile = ''
 
     def __eq__(self, other):
-        return False
+        if not isinstance(other, Acquisition):
+            return False
+        return (self.participant.name == other.participant.name and
+                self.participant.session == other.participant.session and
+                self.dataType == other.dataType and
+                self.modalityLabel == other.modalityLabel and
+                self.customLabels == other.customLabels)
 
     @property
     def modalityLabel(self):
@@ -117,13 +123,11 @@ class Acquisition(object):
         Return:
             The destination root inside the BIDS structure
         """
-        wrong_path = opj(
-            "WRONG",
-            self.participant.directory.replace("/", "_"),
-            "INVALID_" + self.dataType,
-            "broken_" + self.dstFile,
+        return opj(
+            self.participant.directory,
+            self.dataType,
+            self.dstFile,
         )
-        return wrong_path.replace("sub-", "SUB_").replace("ses-", "SES_")
 
     @property
     def dstIntendedFor(self):
@@ -152,27 +156,33 @@ class Acquisition(object):
             current_dict = {}
             suffix_list = []
 
-        for current_key in DEFAULT.entityTableKeys[::-1]:  # Reverse order
-            if current_key in current_dict and new_name != '':
-                new_name += f"-{current_key}_{current_dict[current_key]}"
-            elif current_key in current_dict:
-                new_name = f"{current_key}_{current_dict[current_key]}_broken"
-            current_dict.pop(current_key, None)
+        # Build the name in BIDS entity order
+        for current_key in DEFAULT.entityTableKeys:
+            if current_key in current_dict:
+                if new_name:
+                    new_name += "_"
+                new_name += f"{current_key}-{current_dict[current_key]}"
+                current_dict.pop(current_key, None)
 
+        # Add remaining entities that aren't in the standard table
         for current_key in current_dict:
-            new_name += f"-{current_key}_{current_dict[current_key]}"
-
-        if current_dict:
-            self.logger.warning("Entity \"{}\"".format(list(current_dict.keys())) +
+            if new_name:
+                new_name += "_"
+            new_name += f"{current_key}-{current_dict[current_key]}"
+            self.logger.warning("Entity \"{}\"".format(current_key) +
                                 " is not a valid BIDS entity.")
 
-        new_name += f"-{'--'.join(suffix_list) if suffix_list else 'INVALID'}"
+        # Add suffix
+        if suffix_list:
+            if new_name:
+                new_name += "_"
+            new_name += "_".join(suffix_list)
 
-        if len(suffix_list) != 1:
-            self.logger.warning("There was more than one suffix found "
-                                f"({suffix_list}). This is not BIDS "
-                                "compliant. Make sure you know what "
-                                "you are doing.")
+            if len(suffix_list) != 1:
+                self.logger.warning("There was more than one suffix found "
+                                    f"({suffix_list}). This is not BIDS "
+                                    "compliant. Make sure you know what "
+                                    "you are doing.")
 
         if current_name != new_name:
             self.logger.warning(
@@ -180,7 +190,7 @@ class Acquisition(object):
                 from:   {current_name}
                 to:     {new_name}""")
 
-        self.dstFile = new_name + "_corrupted"
+        self.dstFile = new_name
 
     @property
     def intendedFor(self):

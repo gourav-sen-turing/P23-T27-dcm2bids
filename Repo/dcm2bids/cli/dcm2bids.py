@@ -14,8 +14,7 @@ from dcm2bids.version import __version__
 
 def _build_arg_parser():
     p = argparse.ArgumentParser(description=__doc__, epilog=DEFAULT.doc,
-                                formatter_class=argparse.RawTextHelpFormatter,
-                                add_help=False)
+                                formatter_class=argparse.RawTextHelpFormatter)
 
     p.add_argument("-d", "--dicom_dir",
                    required=False,
@@ -28,7 +27,8 @@ def _build_arg_parser():
                    help="Participant ID.")
 
     p.add_argument("-s", "--session",
-                   required=True,
+                   required=False,
+                   default="",
                    help="Session ID. [%(default)s]")
 
     p.add_argument("-c", "--config",
@@ -37,7 +37,8 @@ def _build_arg_parser():
                    help="JSON configuration file (see example/config.json).")
 
     p.add_argument("-o", "--output_dir",
-                   required=True,
+                   required=False,
+                   default="",
                    help="Output BIDS directory. [%(default)s]")
 
     p.add_argument("--forceDcm2niix",
@@ -50,7 +51,8 @@ def _build_arg_parser():
                    help="Overwrite output if it exists.")
 
     p.add_argument("-l", "--log_level",
-                   required=True,
+                   required=False,
+                   default="INFO",
                    help="Set logging level. [%(default)s]")
     return p
 

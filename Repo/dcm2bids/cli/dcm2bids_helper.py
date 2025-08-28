@@ -12,8 +12,7 @@ from dcm2bids.utils.utils import DEFAULT
 
 def _build_arg_parser():
     p = argparse.ArgumentParser(description=__doc__, epilog=DEFAULT.doc,
-                                formatter_class=argparse.RawTextHelpFormatter,
-                                add_help=False)
+                                formatter_class=argparse.RawTextHelpFormatter)
 
     p.add_argument("-d", "--dicom_dir",
                    required=False,
