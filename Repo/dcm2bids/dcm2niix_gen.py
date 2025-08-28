@@ -29,7 +29,7 @@ class Dcm2niixGen(object):
     ):
         self.logger = logging.getLogger(__name__)
 
-        self.sidecarsFiles = []
+        self.sidecarFiles = []
 
         self.dicomDirs = dicomDirs
         self.bidsDir = bidsDir

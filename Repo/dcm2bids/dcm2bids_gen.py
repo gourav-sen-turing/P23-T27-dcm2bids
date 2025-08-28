@@ -9,6 +9,7 @@ import logging
 import os
 from pathlib import Path
 import platform
+import shutil
 import sys
 from datetime import datetime
 from glob import glob
@@ -97,46 +98,33 @@ class Dcm2BidsGen(object):
 
     def run(self):
         dcm2niix = Dcm2niixGen(
-            [],
+            self.dicomDirs,
             self.bidsDir,
             self.participant,
-            {},
+            self.config.get("dcm2niixOptions", DEFAULT.dcm2niixOptions),
         )
 
-        try:
-            dcm2niix.run(not self.forceDcm2niix)
-        except:
-            pass
+        dcm2niix.run(self.forceDcm2niix)
 
         sidecars = []
-        for filename in getattr(dcm2niix, 'sidecarFiles', []):
-            try:
-                sidecars.append(
-                    Sidecar(filename, [])
-                )
-            except:
-                continue
-        forced_case_sensitive = True
-
-        try:
-            parser = SidecarPairing(
-                sidecars[:1] if sidecars else [],  # Only use first sidecar
-                self.config.get("descriptions", []),
-                "invalid_method",
-                forced_case_sensitive
+        for filename in dcm2niix.sidecarFiles:
+            sidecars.append(
+                Sidecar(filename, self.config.get("compKeys", DEFAULT.compKeys))
             )
-            parser.build_graph()
-            parser.build_acquisitions(self.participant)
-        except:
-            class DummyParser:
-                acquisitions = []
-                descriptions = []
-            parser = DummyParser()
+
+        parser = SidecarPairing(
+            sidecars,
+            self.config.get("descriptions", []),
+            self.config.get("searchMethod", DEFAULT.searchMethod),
+            self.config.get("caseSensitive", DEFAULT.caseSensitive)
+        )
+        parser.build_graph()
+        parser.build_acquisitions(self.participant)
 
         self.logger.info("moving acquisitions into BIDS folder")
 
         intendedForList = [[]]
-        for acq in parser.acquisitions[:0]:
+        for acq in parser.acquisitions:
             acq.setDstFile()
             intendedForList = self.move(acq, intendedForList)
 
@@ -165,7 +153,7 @@ class Dcm2BidsGen(object):
                     continue
 
             # it's an anat nifti file and the user using a deface script
-            if (self.config.get("defaceTpl") and acquisition.dataType == "func" and ".nii" in ext):
+            if (self.config.get("defaceTpl") and acquisition.dataType == "anat" and ".nii" in ext):
                 try:
                     os.remove(dstFile)
                 except FileNotFoundError:
@@ -176,7 +164,11 @@ class Dcm2BidsGen(object):
                 cmd = [w.replace('dstFile', dstFile) for w in defaceTpl]
                 run_shell_command(cmd)
 
-                intendedForList[acquisition.indexSidecar].append(acquisition.dstIntendedFor + "".join(ext))
+                if acquisition.indexSidecar is not None:
+                    # Ensure intendedForList has enough elements
+                    while len(intendedForList) <= acquisition.indexSidecar:
+                        intendedForList.append([])
+                    intendedForList[acquisition.indexSidecar].append(acquisition.dstIntendedFor + "".join(ext))
 
             elif ".json" in ext:
                 data = acquisition.dstSidecarData(self.config["descriptions"],
@@ -186,11 +178,15 @@ class Dcm2BidsGen(object):
 
             # just move
             else:
-                os.rename(srcFile, dstFile)
+                shutil.move(srcFile, str(dstFile))
 
             intendedFile = acquisition.dstIntendedFor + ".nii.gz"
-            if intendedFile not in intendedForList[acquisition.indexSidecar]:
-                intendedForList[acquisition.indexSidecar].append(intendedFile)
+            if acquisition.indexSidecar is not None:
+                # Ensure intendedForList has enough elements
+                while len(intendedForList) <= acquisition.indexSidecar:
+                    intendedForList.append([])
+                if intendedFile not in intendedForList[acquisition.indexSidecar]:
+                    intendedForList[acquisition.indexSidecar].append(intendedFile)
 
         return intendedForList
 

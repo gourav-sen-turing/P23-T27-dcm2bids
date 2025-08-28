@@ -250,6 +250,7 @@ class SidecarPairing(object):
                     self.logger.warning("    ->  %s", acq.suffix)
 
         self.acquisitions = acquisitions + acquisitions_intendedFor
+        self.find_runs()
 
         return self.acquisitions
 
@@ -282,6 +283,10 @@ class SidecarPairing(object):
         for dstRoot, dup in duplicates(dstRoots):
             self.logger.info("%s has %s runs", dstRoot, len(dup))
             self.logger.info("Adding 'run' information to the acquisition")
-            for runNum, acqInd in enumerate(dup):
+
+            # Sort the duplicate acquisitions by their sidecar
+            sorted_dup = sorted(dup, key=lambda i: self.acquisitions[i].srcSidecar if self.acquisitions[i].srcSidecar else Sidecar("", []))
+
+            for runNum, acqInd in enumerate(sorted_dup):
                 runStr = DEFAULT.runTpl.format(runNum + 1)
                 self.acquisitions[acqInd].customLabels += runStr
