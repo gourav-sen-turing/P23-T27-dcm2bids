@@ -251,6 +251,9 @@ class SidecarPairing(object):
 
         self.acquisitions = acquisitions + acquisitions_intendedFor
 
+        # Find and add run numbers to duplicate acquisitions
+        self.find_runs()
+
         return self.acquisitions
 
     def find_runs(self):
@@ -282,6 +285,19 @@ class SidecarPairing(object):
         for dstRoot, dup in duplicates(dstRoots):
             self.logger.info("%s has %s runs", dstRoot, len(dup))
             self.logger.info("Adding 'run' information to the acquisition")
-            for runNum, acqInd in enumerate(dup):
+
+            # Sort duplicates by AcquisitionTime if available
+            # Files without AcquisitionTime should come first
+            def sort_key(acqInd):
+                acq = self.acquisitions[acqInd]
+                if acq.srcSidecar and acq.srcSidecar.origData:
+                    acq_time = acq.srcSidecar.origData.get('AcquisitionTime', '')
+                    if acq_time:
+                        return (1, acq_time)  # Has time, sort by time
+                return (0, '')  # No time, comes first
+
+            sorted_dup = sorted(dup, key=sort_key)
+
+            for runNum, acqInd in enumerate(sorted_dup):
                 runStr = DEFAULT.runTpl.format(runNum + 1)
                 self.acquisitions[acqInd].customLabels += runStr

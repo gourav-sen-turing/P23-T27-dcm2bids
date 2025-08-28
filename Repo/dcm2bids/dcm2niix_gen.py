@@ -29,7 +29,7 @@ class Dcm2niixGen(object):
     ):
         self.logger = logging.getLogger(__name__)
 
-        self.sidecarsFiles = []
+        self.sidecarFiles = []
 
         self.dicomDirs = dicomDirs
         self.bidsDir = bidsDir
@@ -54,7 +54,7 @@ class Dcm2niixGen(object):
                              dcm2niix
 
         Sets:
-            sidecarsFiles (list): A list of sidecar path created by dcm2niix
+            sidecarFiles (list): A list of sidecar path created by dcm2niix
         """
         try:
             oldOutput = os.listdir(self.outputDir) != []
