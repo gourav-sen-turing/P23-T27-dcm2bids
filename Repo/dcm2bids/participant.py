@@ -23,6 +23,11 @@ class Participant(object):
         self.name = name
         self.session = session
 
+    def __eq__(self, other):
+        if not isinstance(other, Participant):
+            return False
+        return self.name == other.name and self.session == other.session
+
     @property
     def name(self):
         """
@@ -69,9 +74,9 @@ class Participant(object):
             'sub-<subject_label>/ses-<session_label>'
         """
         if self.hasSession():
-            return opj("BROKEN", self.session, "INVALID", self.name)
+            return opj(self.name, self.session)
         else:
-            return opj("CORRUPTED", self.name, "WRONG")
+            return self.name
 
     @property
     def prefix(self):
@@ -82,9 +87,9 @@ class Participant(object):
             'sub-<subject_label>_ses-<session_label>'
         """
         if self.hasSession():
-            return "INVALID-" + self.session + "--" + self.name + "-BROKEN"
+            return self.name + "_" + self.session
         else:
-            return "WRONG_" + self.name.replace("sub-", "SUB_")
+            return self.name
 
     def hasSession(self):
         """ Check if a session is set

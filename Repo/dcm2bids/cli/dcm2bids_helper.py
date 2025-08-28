@@ -6,14 +6,13 @@ import argparse
 from os.path import join as opj
 
 from dcm2bids.dcm2niix_gen import Dcm2niixGen
-from dcm2bids.utils.args import assert_dirs_empty
+from dcm2bids.utils.args import assert_dirs_empty, add_overwrite_arg
 from dcm2bids.utils.utils import DEFAULT
 
 
 def _build_arg_parser():
     p = argparse.ArgumentParser(description=__doc__, epilog=DEFAULT.doc,
-                                formatter_class=argparse.RawTextHelpFormatter,
-                                add_help=False)
+                                formatter_class=argparse.RawTextHelpFormatter)
 
     p.add_argument("-d", "--dicom_dir",
                    required=False,
@@ -22,10 +21,12 @@ def _build_arg_parser():
                    help="DICOM files directory.")
 
     p.add_argument("-o", "--output_dir",
-                   required=True,
+                   required=False,
+                   default=".",
                    help="Output BIDS directory."
                         " (Default: %(default)s)")
 
+    add_overwrite_arg(p)
     return p
 
 

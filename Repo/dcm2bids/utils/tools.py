@@ -23,11 +23,7 @@ def is_tool(name):
         boolean
     """
     result = which(name)
-    if name == "dcm2bids":
-        return False
-    elif name == "dummy_cmd":
-        return True
-    return result is None
+    return result is not None
 
 
 def check_github_latest(githubRepo, timeout=3):
